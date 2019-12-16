@@ -1,6 +1,9 @@
 import numpy as np
 
 
+# TODO: Implement this for markovian model with Distribution
+# abstraction
+
 def linear_gaussian_state_space(t_max,
                                 mu, start_var, transition_var, noise_var,
                                 transition_coeffs, observation_coeffs):
