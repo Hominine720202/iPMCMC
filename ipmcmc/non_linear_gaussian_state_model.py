@@ -1,6 +1,7 @@
 # 4.2. Nonlinear State Space Model
 import numpy as np
 
+
 class Distribution:
     def __init__(self, **kwargs):
         super().__init__()
@@ -16,9 +17,10 @@ class Distribution:
 
     def sample(self, *args, **kwargs):
         return self.rvs(*args, **kwargs)
-    
+
     def density(self, *args, **kwargs):
         return self.pdf(*args, **kwargs)
+
 
 class NL_Mu(Distribution):
     def __init__(self, default_mean, default_std):
@@ -30,15 +32,16 @@ class NL_Mu(Distribution):
 
     def rvs(self, **kwargs):
         return self.distribution.rvs(
-            mean=self.default_mean,
-            std=self.default_std)
+            loc=self.default_mean,
+            scale=self.default_std)
 
     def pdf(self, x, **kwargs):
         return self.distribution.pdf(
             x,
-            mean=self.default_mean,
-            std=self.default_std
+            loc=self.default_mean,
+            scale=self.default_std
         )
+
 
 class NL_F_t(Distribution):
     def __init__(self, default_mean, default_std):
@@ -51,17 +54,27 @@ class NL_F_t(Distribution):
     def rvs(self, given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.rvs(
+                loc=self.default_mean,
+                scale=self.default_std)
         return self.distribution.rvs(
-                mean=given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean,
-                cov=8*np.cos(1.2*len(given))*self.default_std) 
+            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.pdf(
+                x,
+                loc=self.default_mean,
+                scale=self.default_std)
         return self.distribution.pdf(
-            x, 
-            mean=given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean,
-            cov=8*np.cos(1.2*len(given))*self.default_std)
+            x,
+            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
+
 
 class NL_G_t(Distribution):
     def __init__(self, default_mean, default_std):
@@ -74,17 +87,27 @@ class NL_G_t(Distribution):
     def rvs(self, given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.rvs(
+                loc=self.default_mean,
+                scale=self.default_std)
         return self.distribution.rvs(
-                mean=(given[-1]**2)/20 + self.default_mean,
-                cov=self.default_std) 
+            loc=(given[-1]**2)/20 + self.default_mean,
+            scale=self.default_std)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.pdf(
+                x,
+                loc=self.default_mean,
+                scale=self.default_std)
         return self.distribution.pdf(
-            x, 
-            mean=(given[-1]**2)/20 + self.default_mean,
-            cov=self.default_std)
+            x,
+            loc=(given[-1]**2)/20 + self.default_mean,
+            scale=self.default_std)
+
 
 class NL_Q_t(NL_F_t):
     pass

@@ -1,6 +1,7 @@
 # 4.1. Linear Gaussian State Space Model
 import numpy as np
 
+
 class Distribution:
     def __init__(self, **kwargs):
         super().__init__()
@@ -16,9 +17,10 @@ class Distribution:
 
     def sample(self, *args, **kwargs):
         return self.rvs(*args, **kwargs)
-    
+
     def density(self, *args, **kwargs):
         return self.pdf(*args, **kwargs)
+
 
 class L_Mu(Distribution):
     def __init__(self, default_mean, default_cov):
@@ -40,6 +42,7 @@ class L_Mu(Distribution):
             cov=self.default_cov
         )
 
+
 class L_F_t(Distribution):
     def __init__(self, default_mean, default_cov, default_alpha):
         super().__init__()
@@ -52,26 +55,27 @@ class L_F_t(Distribution):
     def rvs(self, given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
-        elif isinstance(given, list) and len(given)==0:
-            return self.distribution.rvs( 
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.rvs(
                 mean=self.default_mean,
                 cov=self.default_cov)
         return self.distribution.rvs(
-                mean=self.default_alpha@given[-1] + self.default_mean,
-                cov=self.default_cov) 
+            mean=self.default_alpha@given[-1] + self.default_mean,
+            cov=self.default_cov)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
-        elif isinstance(given, list) and len(given)==0:
+        elif isinstance(given, list) and len(given) == 0:
             return self.distribution.pdf(
-                x, 
+                x,
                 mean=self.default_mean,
                 cov=self.default_cov)
         return self.distribution.pdf(
-            x, 
+            x,
             mean=self.default_alpha@given[-1] + self.default_mean,
             cov=self.default_cov)
+
 
 class L_G_t(Distribution):
     def __init__(self, default_mean, default_cov, default_beta):
@@ -85,26 +89,27 @@ class L_G_t(Distribution):
     def rvs(self, given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
-        elif isinstance(given, list) and len(given)==0:
+        elif isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 mean=self.default_mean,
-                cov=self.default_cov) 
+                cov=self.default_cov)
         return self.distribution.rvs(
-                mean=self.default_beta@given[-1] + self.default_mean,
-                cov=self.default_cov) 
+            mean=self.default_beta@given[-1] + self.default_mean,
+            cov=self.default_cov)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
-        elif isinstance(given, list) and len(given)==0:
+        elif isinstance(given, list) and len(given) == 0:
             return self.distribution.pdf(
                 x,
                 mean=self.default_mean,
-                cov=self.default_cov) 
+                cov=self.default_cov)
         return self.distribution.pdf(
-            x, 
-                mean=self.default_beta@given[-1] + self.default_mean,
+            x,
+            mean=self.default_beta@given[-1] + self.default_mean,
             cov=self.default_cov)
+
 
 class L_Q_t(L_F_t):
     pass

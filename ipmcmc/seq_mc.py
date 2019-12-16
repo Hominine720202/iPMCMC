@@ -54,7 +54,7 @@ def seq_mc(observations: np.ndarray,
         t += 1
         for i in range(n_particles):  # i=particle_id
             # Compute ancestor step
-            p = weights[:, t_1] / weights[:, t_1].sum()
+            p = np.exp(np.log(weights[:, t_1]) - np.log(weights[:, t_1].sum()))
             ancestor = np.random.choice(range(n_particles), p=p)
             past = particles[ancestor][0:t]
             # Generate new particle
