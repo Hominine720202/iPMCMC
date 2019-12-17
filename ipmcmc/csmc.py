@@ -3,25 +3,25 @@ from typing import List
 from seq_mc import Distribution
 
 
-def CSMC(obs: np.ndarray,
-         N: int,
+def csmc(observations: np.ndarray,
+         n_particles: int,
          conditional_traj: np.ndarray,
          proposals: List[Distribution],
-         transitions: List[Distribution],
-         obs_models: List[Distribution]
+         transition_model: List[Distribution],
+         observation_model: List[Distribution]
          ):
 
     T = conditional_traj.shape[0]
-    particles = np.zeros((T, N, conditional_traj.shape[1]))
-    log_weights = np.zeros((T, N))
+    particles = np.zeros((T, n_particles, conditional_traj.shape[1]))
+    log_weights = np.zeros((T, n_particles))
     particles[0] = np.append(proposals[0].sample(
-        size=N-1), conditional_traj[0][np.newaxis, :], axis=0)
-    for i in range(N):
-        weights = obs_models[0].logpdf(obs[0], particles[np.newaxis, 0, i])\
-            + transitions[0].logpdf(particles[0, i])\
+        size=n_particles-1), conditional_traj[0][np.newaxis, :], axis=0)
+    for i in range(n_particles):
+        weights = observation_model[0].logpdf(observations[0], particles[np.newaxis, 0, i])\
+            + transition_model[0].logpdf(particles[0, i])\
             - proposals[0].logpdf(particles[0, i])
         log_weights[0] = weights
-    ancestors = np.zeros((T, N), dtype=int)
+    ancestors = np.zeros((T, n_particles), dtype=int)
     for t in range(1, T):
 
         w_star = log_weights[t-1].max()
@@ -29,18 +29,18 @@ def CSMC(obs: np.ndarray,
 
         p = np.exp(log_weights[t-1] - normalisation_value)
 
-        ancestors[t-1] = np.append(np.random.choice(range(N), size=N-1, p=p))
+        ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p))
 
-        for i in range(N):
-            if i == N-1:
+        for i in range(n_particles):
+            if i == n_particles-1:
                 particles[t, i] = conditional_traj[t]
             else:
                 particles[t, i] = proposals[t].sample(particles[0:t, ancestors[t-1, i]])
 
             particles[0:t, i] = particles[0:t, ancestors[t-1, i]]
 
-            weights = obs_models[t].logpdf(obs[t], particles[0:(t+1), i])\
-                + transitions[t].logpdf(particles[t, i], particles[0:t, i])\
+            weights = observation_model[t].logpdf(observations[t], particles[0:(t+1), i])\
+                + transition_model[t].logpdf(particles[t, i], particles[0:t, i])\
                 - proposals[t].logpdf(particles[t, i], particles[0:t, i])
 
             weights[t, i] = weights
