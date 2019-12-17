@@ -19,6 +19,10 @@ class Distribution:
         """Returns the value of the distribution in a given point x"""
         raise NotImplementedError
 
+    def logpdf(self, x,  given=None, **kwargs):
+        """Returns the value of the log-distribution in a given point x"""
+        raise NotImplementedError
+
     def sample(self, *args, **kwargs):
         return self.rvs(*args, **kwargs)
     
@@ -38,36 +42,39 @@ def seq_mc(observations: np.ndarray,
     s = q_t[0].sample()
     state_shape = s.shape if isinstance(s, np.ndarray) else ()
     particles = [[None for time in range(t_max)] for particle_idx in range(n_particles)]
-    weights = np.zeros((n_particles, len(observations)))
+    log_weights = np.zeros((n_particles, len(observations)))
 
     # Initialisation
     for i in range(n_particles):
         particle = q_t[0].sample()
         particles[i][0] = particle
-        weights[i][0] = np.exp(np.log(g_t[0].density(observations[0], given=[particle]))\
-            + np.log(f_t[0].density(particle, given=list()))\
-            - np.log(q_t[0].density(particle, given=list())))
+        log_weights[i][0] = g_t[0].logpdf(observations[0], given=[particle])\
+            + f_t[0].logpdf(particle, given=list())\
+            - q_t[0].logpdf(particle, given=list())
 
     # Loop
     for t, observation in tqdm(enumerate(observations[1:]), total=t_max-1):  # t=time
         t_1 = t
         t += 1
+
+        w_star = log_weights[:, t_1].max()
+        normalisation_value = w_star + np.log(np.exp(log_weights[:, t_1] - w_star).sum())
         for i in range(n_particles):  # i=particle_id
             # Compute ancestor step
-            p = np.exp(np.log(weights[:, t_1]) - np.log(weights[:, t_1].sum()))
+            p = np.exp(log_weights[:, t_1] - normalisation_value)
             ancestor = np.random.choice(range(n_particles), p=p)
             past = particles[ancestor][0:t]
             # Generate new particle
             particle = q_t[t].sample(given=past)
             trajectory = past + [particle]
             # Compute weight
-            weight = np.exp(np.log(g_t[t].density(observations[t], given=trajectory))\
-            + np.log(f_t[t].density(particle, given=past))\
-            - np.log(q_t[t].density(particle, given=past)))
+            log_weight = g_t[t].logpdf(observations[t], given=trajectory)\
+            + f_t[t].logpdf(particle, given=past)\
+            - q_t[t].logpdf(particle, given=past)
             
             # Store results
             for old_t, elt in enumerate(trajectory):
                 particles[i][old_t] = elt
-            weights[i][t] = weight
+            log_weights[i][t] = log_weight
 
-    return np.array(particles), weights
+    return np.array(particles), log_weights
