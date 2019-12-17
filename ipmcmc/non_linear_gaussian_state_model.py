@@ -1,6 +1,6 @@
 # 4.2. Nonlinear State Space Model
 import numpy as np
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
 
 class NonLinearMu(Distribution):
@@ -11,13 +11,13 @@ class NonLinearMu(Distribution):
         self.default_mean = default_mean
         self.default_std = default_std
 
-    def rvs(self, **kwargs):
+    def rvs(self, given=None, **kwargs):
         return self.distribution.rvs(
             loc=self.default_mean,
             scale=self.default_std,
             **kwargs)
 
-    def logpdf(self, x, **kwargs):
+    def logpdf(self, x, given=None, **kwargs):
         return self.distribution.logpdf(
             x,
             loc=self.default_mean,
@@ -26,7 +26,7 @@ class NonLinearMu(Distribution):
         )
 
 
-class NonLinearTransitionModel(Distribution):
+class NonLinearTransition(Distribution):
     def __init__(self, default_mean, default_std):
         super().__init__()
         from scipy.stats import norm
@@ -43,7 +43,8 @@ class NonLinearTransitionModel(Distribution):
                 scale=self.default_std,
                 **kwargs)
         return self.distribution.rvs(
-            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+            loc=8*np.cos(1.2*len(given)) *
+            (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
             scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
             **kwargs)
 
@@ -58,11 +59,13 @@ class NonLinearTransitionModel(Distribution):
                 **kwargs)
         return self.distribution.logpdf(
             x,
-            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+            loc=8*np.cos(1.2*len(given)) *
+            (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
             scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
             **kwargs)
 
-class NonLinearObservationModel(Distribution):
+
+class NonLinearObservation(Distribution):
     def __init__(self, default_mean, default_std):
         super().__init__()
         from scipy.stats import norm
@@ -99,7 +102,7 @@ class NonLinearObservationModel(Distribution):
             **kwargs)
 
 
-class NonLinearProposalModel(NonLinearTransitionModel):
+class NonLinearProposal(NonLinearTransition):
     pass
 
 

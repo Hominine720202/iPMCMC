@@ -1,6 +1,6 @@
 # 4.1. Linear Gaussian State Space Model
 import numpy as np
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
 
 class LinearMu(Distribution):
@@ -11,13 +11,13 @@ class LinearMu(Distribution):
         self.default_mean = default_mean
         self.default_cov = default_cov
 
-    def rvs(self, **kwargs):
+    def rvs(self, given=None, **kwargs):
         return self.distribution.rvs(
             mean=self.default_mean,
             cov=self.default_cov,
             **kwargs)
 
-    def logpdf(self, x, **kwargs):
+    def logpdf(self, x, given=None, **kwargs):
         return self.distribution.logpdf(
             x,
             mean=self.default_mean,
@@ -25,7 +25,7 @@ class LinearMu(Distribution):
             **kwargs)
 
 
-class LinearTransitionModel(Distribution):
+class LinearTransition(Distribution):
     def __init__(self, default_mean, default_cov, default_alpha):
         super().__init__()
         from scipy.stats import multivariate_normal
@@ -63,7 +63,7 @@ class LinearTransitionModel(Distribution):
             **kwargs)
 
 
-class LinearObservationModel(Distribution):
+class LinearObservation(Distribution):
     def __init__(self, default_mean, default_cov, default_beta):
         super().__init__()
         from scipy.stats import multivariate_normal
@@ -101,7 +101,7 @@ class LinearObservationModel(Distribution):
             **kwargs)
 
 
-class LinearProposalModel(LinearTransitionModel):
+class LinearProposal(LinearTransition):
     pass
 
 
