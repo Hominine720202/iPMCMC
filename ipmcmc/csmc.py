@@ -13,27 +13,36 @@ def CSMC(obs: np.ndarray,
 
     T = conditional_traj.shape[0]
     particles = np.zeros((T, N, conditional_traj.shape[1]))
-    weights = [[]]
+    log_weights = np.zeros((T, N))
     particles[0] = np.append(proposals[0].sample(
         size=N-1), conditional_traj[0][np.newaxis, :], axis=0)
     for i in range(N):
-        weights[0].append(obs_models[0].density(obs[0], particles[np.newaxis, 0, i]) *
-                          transitions[0].density(particles[0, i]) / proposals[0].density(particles[0, i]))
+        weights = obs_models[0].logpdf(obs[0], particles[np.newaxis, 0, i])\
+            + transitions[0].logpdf(particles[0, i])\
+            - proposals[0].logpdf(particles[0, i])
+        log_weights[0] = weights
     ancestors = np.zeros((T, N), dtype=int)
     for t in range(1, T):
-        ancestors[t-1] = np.append(np.random.choice(range(N),
-                                                    size=N-1, p=np.array(weights[t-1])/sum(weights[t-1])), N-1)
 
-        new_particles = []
-        for i in range(N-1):
-            new_particles.append(proposals[t].sample(particles[0:t, ancestors[t-1, i]]))
-        new_particles.append(conditional_traj[t])
-        particles[t] = np.array(new_particles)
-        weights.append([])
+        w_star = log_weights[t-1].max()
+        normalisation_value = w_star + np.log(np.exp(log_weights[t-1] - w_star).sum())
+
+        p = np.exp(log_weights[t-1] - normalisation_value)
+
+        ancestors[t-1] = np.append(np.random.choice(range(N), size=N-1, p=p))
+
         for i in range(N):
-            particles[0:t, i] = particles[0:t, ancestors[t-1, i]]
-            weights[t].append(obs_models[t].density(obs[t], particles[0:(t+1), i]) * transitions[t].density(
-                particles[t, i], particles[0:t, i]) / proposals[t].density(
-                    particles[t,i], particles[0:t, i]))
+            if i == N-1:
+                particles[t, i] = conditional_traj[t]
+            else:
+                particles[t, i] = proposals[t].sample(particles[0:t, ancestors[t-1, i]])
 
-    return particles, np.array(weights)
+            particles[0:t, i] = particles[0:t, ancestors[t-1, i]]
+
+            weights = obs_models[t].logpdf(obs[t], particles[0:(t+1), i])\
+                + transitions[t].logpdf(particles[t, i], particles[0:t, i])\
+                - proposals[t].logpdf(particles[t, i], particles[0:t, i])
+
+            weights[t, i] = weights
+
+    return particles, weights

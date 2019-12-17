@@ -33,7 +33,8 @@ class NL_Mu(Distribution):
     def rvs(self, **kwargs):
         return self.distribution.rvs(
             loc=self.default_mean,
-            scale=self.default_std)
+            scale=self.default_std,
+            **kwargs)
 
     def pdf(self, x, **kwargs):
         return self.distribution.pdf(
@@ -64,10 +65,12 @@ class NL_F_t(Distribution):
         elif isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 loc=self.default_mean,
-                scale=self.default_std)
+                scale=self.default_std,
+                **kwargs)
         return self.distribution.rvs(
             loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
+            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+            **kwargs)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
@@ -109,10 +112,12 @@ class NL_G_t(Distribution):
         elif isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 loc=self.default_mean,
-                scale=self.default_std)
+                scale=self.default_std,
+                **kwargs)
         return self.distribution.rvs(
             loc=(given[-1]**2)/20 + self.default_mean,
-            scale=self.default_std)
+            scale=self.default_std,
+            **kwargs)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
