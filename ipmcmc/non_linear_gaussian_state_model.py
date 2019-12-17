@@ -1,28 +1,9 @@
 # 4.2. Nonlinear State Space Model
 import numpy as np
+from distribution import Distribution
 
 
-class Distribution:
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.kwargs = kwargs
-
-    def rvs(self, given=None, **kwargs):
-        """Returns a random sample following the distribution"""
-        raise NotImplementedError
-
-    def pdf(self, x,  given=None, **kwargs):
-        """Returns the value of the distribution in a given point x"""
-        raise NotImplementedError
-
-    def sample(self, *args, **kwargs):
-        return self.rvs(*args, **kwargs)
-
-    def density(self, *args, **kwargs):
-        return self.pdf(*args, **kwargs)
-
-
-class NL_Mu(Distribution):
+class NonLinearMu(Distribution):
     def __init__(self, default_mean, default_std):
         super().__init__()
         from scipy.stats import norm
@@ -36,22 +17,16 @@ class NL_Mu(Distribution):
             scale=self.default_std,
             **kwargs)
 
-    def pdf(self, x, **kwargs):
-        return self.distribution.pdf(
-            x,
-            loc=self.default_mean,
-            scale=self.default_std
-        )
-    
     def logpdf(self, x, **kwargs):
         return self.distribution.logpdf(
             x,
             loc=self.default_mean,
-            scale=self.default_std
+            scale=self.default_std,
+            **kwargs
         )
 
 
-class NL_F_t(Distribution):
+class NonLinearTransitionModel(Distribution):
     def __init__(self, default_mean, default_std):
         super().__init__()
         from scipy.stats import norm
@@ -72,19 +47,6 @@ class NL_F_t(Distribution):
             scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
             **kwargs)
 
-    def pdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
-            return self.distribution.pdf(
-                x,
-                loc=self.default_mean,
-                scale=self.default_std)
-        return self.distribution.pdf(
-            x,
-            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
-
     def logpdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
@@ -92,13 +54,15 @@ class NL_F_t(Distribution):
             return self.distribution.logpdf(
                 x,
                 loc=self.default_mean,
-                scale=self.default_std)
+                scale=self.default_std,
+                **kwargs)
         return self.distribution.logpdf(
             x,
             loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
+            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+            **kwargs)
 
-class NL_G_t(Distribution):
+class NonLinearObservationModel(Distribution):
     def __init__(self, default_mean, default_std):
         super().__init__()
         from scipy.stats import norm
@@ -119,19 +83,6 @@ class NL_G_t(Distribution):
             scale=self.default_std,
             **kwargs)
 
-    def pdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
-            return self.distribution.pdf(
-                x,
-                loc=self.default_mean,
-                scale=self.default_std)
-        return self.distribution.pdf(
-            x,
-            loc=(given[-1]**2)/20 + self.default_mean,
-            scale=self.default_std)
-
     def logpdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
             raise ValueError
@@ -139,14 +90,16 @@ class NL_G_t(Distribution):
             return self.distribution.logpdf(
                 x,
                 loc=self.default_mean,
-                scale=self.default_std)
+                scale=self.default_std,
+                **kwargs)
         return self.distribution.logpdf(
             x,
             loc=(given[-1]**2)/20 + self.default_mean,
-            scale=self.default_std)
+            scale=self.default_std,
+            **kwargs)
 
 
-class NL_Q_t(NL_F_t):
+class NonLinearProposalModel(NonLinearTransitionModel):
     pass
 
 
