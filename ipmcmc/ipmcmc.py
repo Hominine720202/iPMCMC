@@ -1,8 +1,20 @@
 import numpy as np
-from  csmc import csmc
-from seq_mc import seq_mc
+from typing import List
+from  csmc import CSMC
+from seq_mc import seq_mc, Distribution
 
-def iPMCMC(M, P, R, init_conditional_traj, obs, N):
+
+def iPMCMC(M: int,
+           P: int,
+           R: int,
+           obs: np.ndarray,
+           N: int,
+           init_conditional_traj: np.ndarray,
+           proposals: List[Distribution],
+           transitions: List[Distribution],
+           obs_models: List[Distribution]
+           ):
+    
     c_P = np.random.choice(range(M), P, replace=False)
     conditional_traj = np.zeros((R, P))
     conditional_traj[0] = init_conditional_traj
@@ -10,12 +22,12 @@ def iPMCMC(M, P, R, init_conditional_traj, obs, N):
         M_no_c_P = [i for i in range(M) if i not in c_P]
         Z = {}
         for m in M_no_c_P:
-            _, weights = seq_mc(obs)
+            _, weights = seq_mc(obs, N, transitions, proposals, obs_models)
             Z[m] = np.prod(np.mean(weights, axis=1))
         conditional_weights = {}
         conditional_particles = {}
         for c in c_P:
-            cond_particles, cond_weights = csmc(obs)
+            cond_particles, cond_weights = CSMC(obs, N, conditional_traj[r-1], proposals, transitions, obs_models)
             conditional_weights[c] = cond_weights
             conditional_particles[c] = cond_particles
         
