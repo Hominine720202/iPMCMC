@@ -41,6 +41,13 @@ class NL_Mu(Distribution):
             loc=self.default_mean,
             scale=self.default_std
         )
+    
+    def logpdf(self, x, **kwargs):
+        return self.distribution.logpdf(
+            x,
+            loc=self.default_mean,
+            scale=self.default_std
+        )
 
 
 class NL_F_t(Distribution):
@@ -75,6 +82,18 @@ class NL_F_t(Distribution):
             loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
             scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
 
+    def logpdf(self, x,  given=None, **kwargs):
+        if isinstance(given, type(None)):
+            raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.logpdf(
+                x,
+                loc=self.default_mean,
+                scale=self.default_std)
+        return self.distribution.logpdf(
+            x,
+            loc=8*np.cos(1.2*len(given))*(given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std)
 
 class NL_G_t(Distribution):
     def __init__(self, default_mean, default_std):
@@ -104,6 +123,19 @@ class NL_G_t(Distribution):
                 loc=self.default_mean,
                 scale=self.default_std)
         return self.distribution.pdf(
+            x,
+            loc=(given[-1]**2)/20 + self.default_mean,
+            scale=self.default_std)
+
+    def logpdf(self, x,  given=None, **kwargs):
+        if isinstance(given, type(None)):
+            raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.logpdf(
+                x,
+                loc=self.default_mean,
+                scale=self.default_std)
+        return self.distribution.logpdf(
             x,
             loc=(given[-1]**2)/20 + self.default_mean,
             scale=self.default_std)

@@ -42,6 +42,13 @@ class L_Mu(Distribution):
             cov=self.default_cov
         )
 
+    def logpdf(self, x, **kwargs):
+        return self.distribution.logpdf(
+            x,
+            mean=self.default_mean,
+            cov=self.default_cov
+        )
+
 
 class L_F_t(Distribution):
     def __init__(self, default_mean, default_cov, default_alpha):
@@ -76,6 +83,19 @@ class L_F_t(Distribution):
             mean=self.default_alpha@given[-1] + self.default_mean,
             cov=self.default_cov)
 
+    def logpdf(self, x,  given=None, **kwargs):
+        if isinstance(given, type(None)):
+            raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.logpdf(
+                x,
+                mean=self.default_mean,
+                cov=self.default_cov)
+        return self.distribution.logpdf(
+            x,
+            mean=self.default_alpha@given[-1] + self.default_mean,
+            cov=self.default_cov)
+
 
 class L_G_t(Distribution):
     def __init__(self, default_mean, default_cov, default_beta):
@@ -106,6 +126,19 @@ class L_G_t(Distribution):
                 mean=self.default_mean,
                 cov=self.default_cov)
         return self.distribution.pdf(
+            x,
+            mean=self.default_beta@given[-1] + self.default_mean,
+            cov=self.default_cov)
+
+    def logpdf(self, x,  given=None, **kwargs):
+        if isinstance(given, type(None)):
+            raise ValueError
+        elif isinstance(given, list) and len(given) == 0:
+            return self.distribution.logpdf(
+                x,
+                mean=self.default_mean,
+                cov=self.default_cov)
+        return self.distribution.logpdf(
             x,
             mean=self.default_beta@given[-1] + self.default_mean,
             cov=self.default_cov)
