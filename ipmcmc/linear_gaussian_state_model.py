@@ -33,7 +33,8 @@ class L_Mu(Distribution):
     def rvs(self, **kwargs):
         return self.distribution.rvs(
             mean=self.default_mean,
-            cov=self.default_cov)
+            cov=self.default_cov,
+            **kwargs)
 
     def pdf(self, x, **kwargs):
         return self.distribution.pdf(
@@ -65,10 +66,12 @@ class L_F_t(Distribution):
         elif isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 mean=self.default_mean,
-                cov=self.default_cov)
+                cov=self.default_cov,
+                **kwargs)
         return self.distribution.rvs(
             mean=self.default_alpha@given[-1] + self.default_mean,
-            cov=self.default_cov)
+            cov=self.default_cov,
+            **kwargs)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
@@ -112,10 +115,12 @@ class L_G_t(Distribution):
         elif isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 mean=self.default_mean,
-                cov=self.default_cov)
+                cov=self.default_cov,
+                **kwargs)
         return self.distribution.rvs(
             mean=self.default_beta@given[-1] + self.default_mean,
-            cov=self.default_cov)
+            cov=self.default_cov,
+            **kwargs)
 
     def pdf(self, x,  given=None, **kwargs):
         if isinstance(given, type(None)):
