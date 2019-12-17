@@ -36,13 +36,14 @@ def seq_mc(observations: np.ndarray,
            q_t: List[Distribution],
            g_t: List[Distribution]
            ):
-
+    # TODO: Add return of ancestors to keep track of what happened
     t_max = len(observations)
     # We assume that the size of the state doesn't change with time
     s = q_t[0].sample()
     state_shape = s.shape if isinstance(s, np.ndarray) else ()
     particles = [[None for time in range(t_max)] for particle_idx in range(n_particles)]
     log_weights = np.zeros((n_particles, len(observations)))
+    ancestors = np.zeros((n_particles, len(observations)-1))
 
     # Initialisation
     for i in range(n_particles):
@@ -63,6 +64,7 @@ def seq_mc(observations: np.ndarray,
             # Compute ancestor step
             p = np.exp(log_weights[:, t_1] - normalisation_value)
             ancestor = np.random.choice(range(n_particles), p=p)
+            ancestors[i][t_1] = ancestor
             past = particles[ancestor][0:t]
             # Generate new particle
             particle = q_t[t].sample(given=past)
@@ -77,4 +79,4 @@ def seq_mc(observations: np.ndarray,
                 particles[i][old_t] = elt
             log_weights[i][t] = log_weight
 
-    return np.array(particles), log_weights
+    return np.array(particles), log_weights, ancestors
