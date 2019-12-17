@@ -33,7 +33,7 @@ def CSMC(obs: np.ndarray,
         for i in range(N):
             particles[0:t, i] = particles[0:t, ancestors[t-1, i]]
             weights[t].append(obs_models[t].density(obs[t], particles[0:(t+1), i]) * transitions[t].density(
-                particles[t, i], particles[0:t, ancestors[t-1, i]]) / proposals[t].density(
-                    particles[t,i], particles[0:t, ancestors[t-1, i]]))
+                particles[t, i], particles[0:t, i]) / proposals[t].density(
+                    particles[t,i], particles[0:t, i]))
 
     return particles, np.array(weights)
