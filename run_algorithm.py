@@ -55,8 +55,8 @@ if __name__ == "__main__":
 
         n_particles = 50
 
-        transition_model = [NonLinearTransition(
-            default_mean=0, default_std=omega) for t in range(0, t_max)]
+        transition_model = [NonLinearMu(default_mean=mu, default_std=start_std)]+[NonLinearTransition(
+            default_mean=0, default_std=omega) for t in range(1, t_max)]
         proposals = [NonLinearMu(default_mean=mu, default_std=start_std)]+[
             NonLinearProposal(default_mean=0, default_std=omega) for t in range(1, t_max)]
         observation_model = [NonLinearObservation(
