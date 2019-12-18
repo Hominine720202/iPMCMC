@@ -1,9 +1,9 @@
 import numpy as np
 from typing import List
-from distribution import Distribution
-from csmc import csmc
-from smc import smc
-
+from ipmcmc.distribution import Distribution
+from ipmcmc.csmc import csmc
+from ipmcmc.smc import smc
+from tqdm import tqdm
 
 def ipmcmc(n_steps: int,
            n_nodes: int,
@@ -26,16 +26,19 @@ def ipmcmc(n_steps: int,
     particles = np.zeros((n_steps, n_nodes, trajectories_length, n_particles, state_dim))
     zetas = np.zeros((n_steps, n_conditional_nodes, n_nodes))
 
-    for r in range(1, n_steps+1):
+    for r in tqdm(range(1, n_steps+1)):
         c_P = conditional_indices[r-1]
         m_no_cp = [i for i in range(n_nodes) if i not in c_P]
         Z = {}
+        
+        # Classic Sequential Monte Carlo
         for m in m_no_cp:
             non_cond_particles, non_cond_weights, _ = smc(observations, n_particles, transition_model, proposals, observation_model)
             weights[r-1, m] = non_cond_weights
             particles[r-1, m] = non_cond_particles
             Z[m] = non_cond_weights.mean(axis=1).prod()
 
+        # Conditional Sequential Monte Carlo
         for i, c in enumerate(c_P):
             cond_particles, cond_weights, _ = csmc(observations, n_particles, conditional_traj[r-1, i], proposals, transition_model, observation_model)
             weights[r-1, c] = cond_weights

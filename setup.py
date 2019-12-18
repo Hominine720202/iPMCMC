@@ -11,6 +11,6 @@ setup(name='ipmcmc',
       authors_email=['corentin.ambroise@u-psud.fr', 'luis.montero@u-psud.fr'],
       url="https://github.com/fd0r/iPMCMC/",  # TODO: Add link to repository
       packages=find_packages(),
-      install_requires=['numpy', 'scipy'],
+      install_requires=['numpy', 'scipy', 'tqdm', 'filterpy'],
       extra_requires=dict()
       )

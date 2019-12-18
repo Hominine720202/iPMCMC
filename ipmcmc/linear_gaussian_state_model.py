@@ -1,6 +1,6 @@
 # 4.1. Linear Gaussian State Space Model
 import numpy as np
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
 
 class LinearMu(Distribution):
@@ -35,9 +35,7 @@ class LinearTransition(Distribution):
         self.default_alpha = default_alpha
 
     def rvs(self, given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 mean=self.default_mean,
                 cov=self.default_cov,
@@ -48,9 +46,7 @@ class LinearTransition(Distribution):
             **kwargs)
 
     def logpdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.logpdf(
                 x,
                 mean=self.default_mean,
@@ -73,9 +69,7 @@ class LinearObservation(Distribution):
         self.default_beta = default_beta
 
     def rvs(self, given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 mean=self.default_mean,
                 cov=self.default_cov,
@@ -86,9 +80,7 @@ class LinearObservation(Distribution):
             **kwargs)
 
     def logpdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.logpdf(
                 x,
                 mean=self.default_mean,

@@ -2,7 +2,7 @@ from tqdm import tqdm
 from typing import List, Callable
 import numpy as np
 import scipy
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
 
 # Seqential Monte Carlo for HMM models
@@ -15,7 +15,7 @@ def smc(observations: np.ndarray,
     # Values to fill
     t_max = len(observations)
     # particles = [[None for particle_idx in range(n_particles)] for time in range(t_max)]
-    particles = np.zeros((t_max, n_particles, len(proposals[0].default_mean)))
+    particles = np.zeros((t_max, n_particles)+proposals[0].rvs().shape)
     log_weights = np.zeros((t_max, n_particles))
     ancestors = np.zeros((t_max-1, n_particles), dtype=int)
 

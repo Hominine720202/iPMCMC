@@ -1,7 +1,8 @@
 # 4.2. Nonlinear State Space Model
 import numpy as np
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
+# TODO: Clean kwargs handling
 
 class NonLinearMu(Distribution):
     def __init__(self, default_mean, default_std):
@@ -12,10 +13,15 @@ class NonLinearMu(Distribution):
         self.default_std = default_std
 
     def rvs(self, given=None, **kwargs):
+        if kwargs.setdefault('size', 1) == 1:
+            return self.distribution.rvs(
+                loc=self.default_mean,
+                scale=self.default_std,
+                **kwargs)
         return self.distribution.rvs(
             loc=self.default_mean,
             scale=self.default_std,
-            **kwargs)
+            **kwargs)[:, np.newaxis]
 
     def logpdf(self, x, given=None, **kwargs):
         return self.distribution.logpdf(
@@ -35,23 +41,31 @@ class NonLinearTransition(Distribution):
         self.default_std = default_std
 
     def rvs(self, given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if kwargs.setdefault('size', 1)==1:
+            if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
+                return self.distribution.rvs(
+                    loc=self.default_mean,
+                    scale=self.default_std,
+                    **kwargs)
+            return self.distribution.rvs(
+                loc=8*np.cos(1.2*len(given)) *
+                (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
+                scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+                **kwargs)
+
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 loc=self.default_mean,
                 scale=self.default_std,
-                **kwargs)
+                **kwargs)[:,np.newaxis]
         return self.distribution.rvs(
             loc=8*np.cos(1.2*len(given)) *
             (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
             scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
-            **kwargs)
+            **kwargs)[:, np.newaxis]
 
     def logpdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.logpdf(
                 x,
                 loc=self.default_mean,
@@ -74,22 +88,29 @@ class NonLinearObservation(Distribution):
         self.default_std = default_std
 
     def rvs(self, given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if kwargs.setdefault('size', 1)==1:
+            if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
+                return self.distribution.rvs(
+                    loc=self.default_mean,
+                    scale=self.default_std,
+                    **kwargs)
+            return self.distribution.rvs(
+                loc=(given[-1]**2)/20 + self.default_mean,
+                scale=self.default_std,
+                **kwargs)
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.rvs(
                 loc=self.default_mean,
                 scale=self.default_std,
-                **kwargs)
+                **kwargs)[:,np.newaxis]
         return self.distribution.rvs(
             loc=(given[-1]**2)/20 + self.default_mean,
             scale=self.default_std,
-            **kwargs)
+            **kwargs)[:,np.newaxis]
+
 
     def logpdf(self, x,  given=None, **kwargs):
-        if isinstance(given, type(None)):
-            raise ValueError
-        elif isinstance(given, list) and len(given) == 0:
+        if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
             return self.distribution.logpdf(
                 x,
                 loc=self.default_mean,

@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from distribution import Distribution
+from ipmcmc.distribution import Distribution
 
 
 def csmc(observations: np.ndarray,
@@ -12,7 +12,7 @@ def csmc(observations: np.ndarray,
          ):
 
     T = observations.shape[0]
-    particles = np.zeros((T, n_particles, conditional_traj.shape[1]))
+    particles = np.zeros((T, n_particles)+conditional_traj.shape[1:])
     log_weights = np.zeros((T, n_particles))
     particles[0] = np.append(proposals[0].sample(
         size=n_particles-1), conditional_traj[0][np.newaxis, :], axis=0)
