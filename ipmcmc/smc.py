@@ -2,7 +2,7 @@ from tqdm import tqdm
 from typing import List, Callable
 import numpy as np
 import scipy
-from ipmcmc.distribution import Distribution
+from .distribution import Distribution
 
 
 # Seqential Monte Carlo for HMM models

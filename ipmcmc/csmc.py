@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from ipmcmc.distribution import Distribution
+from .distribution import Distribution
 
 
 def csmc(observations: np.ndarray,

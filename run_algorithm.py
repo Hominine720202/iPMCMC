@@ -41,7 +41,7 @@ if __name__ == "__main__":
         assert np.all(np.linalg.eigvals(sigma) > 0)
 
         states, observations = linear_gaussian_state_space(
-            t_max=t_max, mu=mu, start_var=start_var, transition_var=omega, noise_var=sigma, 
+            t_max=t_max, mu=mu, start_var=start_var, transition_var=omega, noise_var=sigma,
             transition_coeffs=alpha, observation_coeffs=beta)
         print((states.shape, observations.shape))
     else:  # Non linear case
@@ -69,7 +69,8 @@ if __name__ == "__main__":
     n_nodes = 32
     n_conditional_nodes = 16
     n_steps = 10
-    init_conditional_traj = np.zeros((n_conditional_nodes, t_max)+proposals[0].rvs().shape)
+    init_conditional_traj = np.zeros(
+        (n_conditional_nodes, t_max)+proposals[0].rvs().shape)
     print('init_conditional_traj')
     for i in tqdm(range(n_conditional_nodes)):
         particles, _, _ = smc(observations, n_particles,
@@ -98,10 +99,10 @@ if __name__ == "__main__":
     w_barre = weights.mean(axis=2)
 
     if hasattr(mu, 'shape'):
-        rao_black_traj = np.zeros((n_steps, n_conditional_nodes, t_max)+mu.shape)
+        rao_black_traj = np.zeros(
+            (n_steps, n_conditional_nodes, t_max)+mu.shape)
     else:
         rao_black_traj = np.zeros((n_steps, n_conditional_nodes, t_max))
-
 
     for r in range(n_steps):
         for p in range(n_conditional_nodes):
