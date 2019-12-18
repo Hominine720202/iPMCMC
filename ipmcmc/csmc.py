@@ -30,7 +30,7 @@ def csmc(observations: np.ndarray,
         p = np.exp(log_weights[t-1] - normalisation_value)
 
         ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p), n_particles-1)
-
+        
         for i in range(n_particles):
             if i == n_particles-1:
                 particles[t, i] = conditional_traj[t]
