@@ -21,7 +21,7 @@ def csmc(observations: np.ndarray,
             + transition_model[0].logpdf(particles[0, i])\
             - proposals[0].logpdf(particles[0, i])
         log_weights[0] = weights
-    ancestors = np.zeros((T, n_particles), dtype=int)
+    ancestors = np.zeros((T-1, n_particles), dtype=int)
     for t in range(1, T):
 
         w_star = log_weights[t-1].max()
@@ -29,7 +29,9 @@ def csmc(observations: np.ndarray,
 
         p = np.exp(log_weights[t-1] - normalisation_value)
 
-        ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p), n_particles-1)
+        new_ancestors_indices = np.searchsorted(p.cumsum(), np.random.rand(n_particles-1))
+        ancestors[t-1] = np.append(np.array(list(range(n_particles)))[new_ancestors_indices], n_particles-1)
+        #ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p), n_particles-1)
         
         for i in range(n_particles):
             if i == n_particles-1:

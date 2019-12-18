@@ -1,3 +1,6 @@
+.DS_Store
+.ipynb_checkpoints/
+
 ipmcmc/__pycache__/*
 build/*
 dist/*

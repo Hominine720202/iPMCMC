@@ -13,8 +13,7 @@ def smc(observations: np.ndarray,
         observation_model: List[Distribution]
         ):
     # Values to fill
-    t_max = len(observations)
-    # particles = [[None for particle_idx in range(n_particles)] for time in range(t_max)]
+    t_max = observations.shape[0]
     particles = np.zeros((t_max, n_particles)+proposals[0].rvs().shape)
     log_weights = np.zeros((t_max, n_particles))
     ancestors = np.zeros((t_max-1, n_particles), dtype=int)
@@ -32,11 +31,13 @@ def smc(observations: np.ndarray,
         t_1 = t
         t += 1
         
-        previous_log_weights = log_weights[t_1, :]
-        w_star = previous_log_weights.max()
-        normalisation_value =  np.log(np.exp(previous_log_weights - w_star).sum()) + w_star
-        probabilities = np.exp(previous_log_weights - normalisation_value)
-        ancestors[t_1] = np.random.choice(range(n_particles), size=n_particles, p=probabilities)
+        w_star = log_weights[t_1].max()
+        normalisation_value =  np.log(np.exp(log_weights[t_1] - w_star).sum()) + w_star
+        p = np.exp(log_weights[t_1] - normalisation_value)
+
+        new_ancestors_indices = np.searchsorted(p.cumsum(), np.random.rand(n_particles))
+        ancestors[t-1] = np.array(list(range(n_particles)))[new_ancestors_indices]
+        #ancestors[t_1] = np.random.choice(range(n_particles), size=n_particles, p=probabilities)
 
         for i in range(n_particles):  # i=particle_id
             # Compute ancestor step
