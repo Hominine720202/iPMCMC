@@ -8,7 +8,7 @@ from ipmcmc.non_linear_gaussian_state_model import *
 from ipmcmc.smc import *
 from ipmcmc.csmc import *
 from ipmcmc.ipmcmc import *
-
+from multiprocessing import Pool
 
 if __name__ == "__main__":
     if False:  # Linear case
@@ -72,10 +72,19 @@ if __name__ == "__main__":
     init_conditional_traj = np.zeros(
         (n_conditional_nodes, t_max)+proposals[0].rvs().shape)
     print('init_conditional_traj')
-    for i in tqdm(range(n_conditional_nodes)):
-        particles, _, _ = smc(observations, n_particles,
-                              transition_model, proposals, observation_model)
-        init_conditional_traj[i] = particles.mean(axis=1)
+    # for i in tqdm(range(n_conditional_nodes)):
+    n_jobs = 4
+    with Pool(processes=n_jobs) as pool:
+        results = pool.starmap(
+            smc, (
+                (observations, n_particles, transition_model, proposals, observation_model) 
+                for _ in range(n_conditional_nodes)))
+
+        #particles, _, _ = smc(observations, n_particles,
+        #                     transition_model, proposals, observation_model)
+    for i, res in enumerate(results):
+        init_conditional_traj[i] = res[0].mean(axis=1)
+    
     print('running ipmcmc')
     particles, conditional_traj, weights, conditional_indices, zetas = ipmcmc(
         n_steps, n_nodes, n_conditional_nodes, observations, n_particles, init_conditional_traj,
