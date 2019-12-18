@@ -1,6 +1,6 @@
 # 4.2. Nonlinear State Space Model
 import numpy as np
-from ipmcmc.distribution import Distribution
+from distribution import Distribution
 
 
 class NonLinearMu(Distribution):

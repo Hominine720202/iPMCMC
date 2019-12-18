@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from seq_mc import Distribution
+from distribution import Distribution
 
 
 def csmc(observations: np.ndarray,
@@ -11,7 +11,7 @@ def csmc(observations: np.ndarray,
          observation_model: List[Distribution]
          ):
 
-    T = conditional_traj.shape[0]
+    T = observations.shape[0]
     particles = np.zeros((T, n_particles, conditional_traj.shape[1]))
     log_weights = np.zeros((T, n_particles))
     particles[0] = np.append(proposals[0].sample(
@@ -29,7 +29,7 @@ def csmc(observations: np.ndarray,
 
         p = np.exp(log_weights[t-1] - normalisation_value)
 
-        ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p))
+        ancestors[t-1] = np.append(np.random.choice(range(n_particles), size=n_particles-1, p=p), n_particles-1)
 
         for i in range(n_particles):
             if i == n_particles-1:
@@ -42,7 +42,7 @@ def csmc(observations: np.ndarray,
             weights = observation_model[t].logpdf(observations[t], particles[0:(t+1), i])\
                 + transition_model[t].logpdf(particles[t, i], particles[0:t, i])\
                 - proposals[t].logpdf(particles[t, i], particles[0:t, i])
+            
+            log_weights[t, i] = weights
 
-            weights[t, i] = weights
-
-    return particles, weights
+    return particles, np.exp(log_weights), ancestors
