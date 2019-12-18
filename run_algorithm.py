@@ -8,10 +8,11 @@ from ipmcmc.non_linear_gaussian_state_model import *
 from ipmcmc.smc import *
 from ipmcmc.csmc import *
 from ipmcmc.ipmcmc import *
+from ipmcmc.estimation import *
 
 
 if __name__ == "__main__":
-    if False:  # Linear case
+    if True:  # Linear case
         # 4.1. Linear Gaussian State Space Model
         np.random.seed(420)
         # Parameters
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     # %%
     n_nodes = 32
     n_conditional_nodes = 16
-    n_steps = 10
+    n_steps = 5
     init_conditional_traj = np.zeros((n_conditional_nodes, t_max)+proposals[0].rvs().shape)
     print('init_conditional_traj')
     for i in tqdm(range(n_conditional_nodes)):
@@ -80,38 +81,19 @@ if __name__ == "__main__":
         n_steps, n_nodes, n_conditional_nodes, observations, n_particles, init_conditional_traj,
         proposals, transition_model, observation_model)
 
-    zetas.shape
+    if True:
+        print('Mean estimation')
 
-    fk = KalmanFilter(dim_x=3, dim_z=20)
+        true_means, true_covs = compute_ground_truth(observations, mu, start_var, alpha, omega, beta, sigma)
 
-    fk.x = states[0]
-    fk.P = start_var
+        rao_black_traj = rao_blackwellisation(particles, weights, zetas, n_conditional_nodes)
 
-    fk.F = alpha
-    fk.Q = omega
+        errors_function_of_mcmc_step = []
+        errors_function_of_state_step = []
+        for r in range(1, (n_steps+1)):
+            errors_function_of_mcmc_step.append(compute_error(rao_black_traj, true_means, r))
 
-    fk.H = beta
-    fk.R = sigma
+        for t in range(1, (t_max+1)):
+            errors_function_of_state_step.append(compute_error(rao_black_traj, true_means, state_step=t))
 
-    mu_kal, cov_kal, _, _ = fk.batch_filter(observations)
-    means, covs, gain, predicted_covs = fk.rts_smoother(mu_kal, cov_kal)
-    w_barre = weights.mean(axis=2)
-
-    if hasattr(mu, 'shape'):
-        rao_black_traj = np.zeros((n_steps, n_conditional_nodes, t_max)+mu.shape)
-    else:
-        rao_black_traj = np.zeros((n_steps, n_conditional_nodes, t_max))
-
-
-    for r in range(n_steps):
-        for p in range(n_conditional_nodes):
-            for m in range(n_nodes):
-                weighted_sum_parts = np.zeros((t_max, len(mu)))
-                for n in range(n_particles):
-                    weighted_sum_parts += w_barre[r,
-                                                  m, n] * particles[r, m, :, n]
-                weighted_zetas = zetas[r, p, m] * weighted_sum_parts
-                rao_black_traj[r, p] += weighted_zetas
-
-    estimated_means_from_ipmcmc = np.mean(rao_black_traj, axis=(0, 1))
-    print(estimated_means_from_ipmcmc)
+    
