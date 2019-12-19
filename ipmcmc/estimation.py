@@ -11,8 +11,9 @@ def rao_blackwellisation(particles, weights, zetas, n_conditional_nodes):
         for p in range(n_conditional_nodes):
             for m in range(n_nodes):
                 weighted_sum_parts = np.zeros((t_max, state_dim))
+                w_barre = weights[r, m, -1] / sum(weights[r, m, -1])
                 for n in range(n_particles):
-                    weighted_sum_parts += w_barre[r, m, n] * particles[r, m, :, n]
+                    weighted_sum_parts += w_barre[n] * particles[r, m, :, n]
                 weighted_zetas = zetas[r, p, m] * weighted_sum_parts
                 rao_black_traj[r, p] += weighted_zetas
     

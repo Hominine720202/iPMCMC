@@ -48,9 +48,8 @@ class NonLinearTransition(Distribution):
                     scale=self.default_std,
                     **kwargs)
             return self.distribution.rvs(
-                loc=8*np.cos(1.2*len(given)) *
-                (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-                scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+                loc=given[-1]/2 + 25*given[-1]/(1+given[-1]**2) + self.default_mean,
+                scale=np.abs(8*np.cos(1.2*(len(given) + 1)))*self.default_std,
                 **kwargs)
 
         if isinstance(given, type(None)) or isinstance(given, list) and len(given) == 0:
@@ -59,9 +58,8 @@ class NonLinearTransition(Distribution):
                 scale=self.default_std,
                 **kwargs)[:,np.newaxis]
         return self.distribution.rvs(
-            loc=8*np.cos(1.2*len(given)) *
-            (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+            loc=given[-1]/2 + 25*given[-1]/(1+given[-1]**2) + self.default_mean,
+            scale=np.abs(8*np.cos(1.2*(len(given) + 1)))*self.default_std,
             **kwargs)[:, np.newaxis]
 
     def logpdf(self, x,  given=None, **kwargs):
@@ -73,9 +71,8 @@ class NonLinearTransition(Distribution):
                 **kwargs)
         return self.distribution.logpdf(
             x,
-            loc=8*np.cos(1.2*len(given)) *
-            (given[-1]/2+25*(given[-1]/(1+given[-1]**2))+self.default_mean),
-            scale=np.abs(8*np.cos(1.2*len(given)))*self.default_std,
+            loc=given[-1]/2 + 25*given[-1]/(1+given[-1]**2) + self.default_mean,
+            scale=np.abs(8*np.cos(1.2*(len(given) + 1)))*self.default_std,
             **kwargs)
 
 
