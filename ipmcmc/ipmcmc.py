@@ -53,7 +53,7 @@ def ipmcmc(n_steps: int,
             zetas[r-1, j] = zeta
             new_c_P.append(np.random.choice(range(n_nodes), p=zeta))
 
-            cond_weight = weights[r-1, c_P[j]].mean(axis=0)
+            cond_weight = weights[r-1, c_P[j], -1]
             b_j = np.random.choice(range(n_particles), p=cond_weight/sum(cond_weight))
             conditional_traj[r, j] = particles[r-1, c_P[j], :, b_j]
         conditional_indices[r] = np.array(new_c_P)
