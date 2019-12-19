@@ -12,7 +12,7 @@ from ipmcmc.estimation import *
 
 
 if __name__ == "__main__":
-    if True:  # Linear case
+    if False:  # Linear case
         # 4.1. Linear Gaussian State Space Model
         np.random.seed(420)
         # Parameters
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         omega = np.sqrt(10)
         sigma = np.sqrt(10)
 
-        n_particles = 50
+        n_particles = 100
 
         transition_model = [NonLinearMu(default_mean=mu, default_std=start_std)]+[NonLinearTransition(
             default_mean=0, default_std=omega) for t in range(1, t_max)]
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         n_steps, n_nodes, n_conditional_nodes, observations, n_particles, init_conditional_traj,
         proposals, transition_model, observation_model)
 
-    if True:
+    if False:
         print('Mean estimation')
 
         true_means, true_covs = compute_ground_truth(observations, mu, start_var, alpha, omega, beta, sigma)
@@ -96,5 +96,6 @@ if __name__ == "__main__":
 
         for t in range(1, (t_max+1)):
             errors_function_of_state_step.append(compute_error(rao_black_traj, true_means, state_step=t))
+        
 
     
