@@ -67,7 +67,7 @@ if __name__ == "__main__":
             t_max=t_max, mu=mu, start_std=start_std, transition_std=omega, noise_std=sigma)
 
     # %%
-    n_nodes = 32
+    n_nodes = 8
     n_conditional_nodes = 16
 
     n_steps = 5
