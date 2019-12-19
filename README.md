@@ -2,7 +2,31 @@
 
 Python implemenation of iPMCMC: http://proceedings.mlr.press/v48/rainforth16.pdf
 
-*Work in progress*
+## Installation
+
+To install the package, you must have python 3 installed on your computer. After cloning the repository, go into the root of the repository and type the following command line:
+
+```
+python setup.py install 
+```
+You can check if the module was correctly installed using pip:
+
+```
+pip show ipmcmc
+```
+
+Then you should be able to use ipmcmc as a package, by simply importing it as follows:
+
+```python
+import ipmcmc   
+```
+
+ 
+If the installation did not work or something went wrong, try:
+
+```
+python reset_module.py
+```
 
 ## Experiments
 
