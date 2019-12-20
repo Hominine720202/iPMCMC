@@ -67,16 +67,16 @@ if __name__ == "__main__":
             t_max=t_max, mu=mu, start_std=start_std, transition_std=omega, noise_std=sigma)
 
     # %%
-    n_nodes = 8
+    n_nodes = 32
     n_conditional_nodes = 16
 
     n_steps = 5
     init_conditional_traj = np.zeros((n_conditional_nodes, t_max)+proposals[0].rvs().shape)
     print('init_conditional_traj')
     for i in tqdm(range(n_conditional_nodes)):
-        particles, _, _ = smc(observations, n_particles,
+        particles, weights, _ = smc(observations, n_particles,
                               transition_model, proposals, observation_model)
-        init_conditional_traj[i] = particles.mean(axis=1)
+        init_conditional_traj[i] = particles[:,np.argmax(weights[-1])]
     print('running ipmcmc')
     particles, conditional_traj, weights, conditional_indices, zetas = ipmcmc(
         n_steps, n_nodes, n_conditional_nodes, observations, n_particles, init_conditional_traj,
